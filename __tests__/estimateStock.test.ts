@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { estimateStock } from '@/lib/estimateStock'
 import { transactions } from '@/lib/fixtures'
-import { Transaction } from '@/lib/types'
+import { Transaction, Unit } from '@/lib/types'
 
 describe('estimateStock', () => {
   test('nets the fixture transactions per item', () => {
@@ -23,6 +23,7 @@ describe('estimateStock', () => {
         id: 'txn-005',
         itemId: '001',
         quantity: -2.5,
+        unit: Unit.KG,
         type: 'adjustment',
         timestamp: '2026-11-09T18:00:00.000Z',
         notes: 'Trimmed and discarded',
@@ -31,6 +32,7 @@ describe('estimateStock', () => {
         id: 'txn-006',
         itemId: '030',
         quantity: 40,
+        unit: Unit.ROLL,
         type: 'batch_made',
         timestamp: '2026-11-09T18:30:00.000Z',
         notes: 'Rolled for tomorrow',

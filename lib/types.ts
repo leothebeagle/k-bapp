@@ -41,6 +41,8 @@ export type Transaction = {
   itemId: string
   /** Positive adds stock, negative subtracts it. */
   quantity: number
+  /** Must match the item's stock unit. */
+  unit: Unit
   type: TransactionType
   /** ISO 8601 timestamp. */
   timestamp: string
