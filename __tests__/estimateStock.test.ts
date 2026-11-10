@@ -6,10 +6,10 @@ import { Transaction } from '@/lib/types'
 describe('estimateStock', () => {
   test('nets the fixture transactions per item', () => {
     expect(estimateStock(transactions)).toEqual([
-      { itemId: 'raw-beef', quantity: 15 },
-      { itemId: 'soy-sauce', quantity: 6 },
-      { itemId: 'beef-marinade', quantity: 4 },
-      { itemId: 'beef-kimbap', quantity: -10 },
+      { itemId: '001', quantity: 15 },
+      { itemId: '009', quantity: 6 },
+      { itemId: '018', quantity: 4 },
+      { itemId: '030', quantity: -10 },
     ])
   })
 
@@ -21,7 +21,7 @@ describe('estimateStock', () => {
     const extra: Transaction[] = [
       {
         id: 'txn-005',
-        itemId: 'raw-beef',
+        itemId: '001',
         quantity: -2.5,
         type: 'adjustment',
         timestamp: '2026-11-09T18:00:00.000Z',
@@ -29,7 +29,7 @@ describe('estimateStock', () => {
       },
       {
         id: 'txn-006',
-        itemId: 'beef-kimbap',
+        itemId: '030',
         quantity: 40,
         type: 'batch_made',
         timestamp: '2026-11-09T18:30:00.000Z',
@@ -37,10 +37,10 @@ describe('estimateStock', () => {
       },
     ]
     expect(estimateStock([...transactions, ...extra])).toEqual([
-      { itemId: 'raw-beef', quantity: 12.5 },
-      { itemId: 'soy-sauce', quantity: 6 },
-      { itemId: 'beef-marinade', quantity: 4 },
-      { itemId: 'beef-kimbap', quantity: 30 },
+      { itemId: '001', quantity: 12.5 },
+      { itemId: '009', quantity: 6 },
+      { itemId: '018', quantity: 4 },
+      { itemId: '030', quantity: 30 },
     ])
   })
 })

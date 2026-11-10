@@ -19,9 +19,22 @@ export type Item = {
   name: string
   stage: ItemStage
   unit: Unit
+  /** If true, this item is assembled on demand and par levels do not apply. */
+  madeToOrder?: boolean
 }
 
-export type TransactionType = 'delivery' | 'batch_made' | 'adjustment' | 'sale'
+export type Lot = {
+  id: string
+  itemId: string
+  vendorId?: string
+  quantity: number
+  unit: Unit
+  purchasedAt: string
+  expiresAt?: string
+  notes?: string
+}
+
+export type TransactionType = 'restock' | 'batch_made' | 'adjustment' | 'sale'
 
 export type Transaction = {
   id: string
@@ -36,6 +49,9 @@ export type Transaction = {
   workflowRunId?: string
   /** Set when the transaction came from a specific workflow step. */
   workflowStepId?: string
+  /** Name or user ID of who performed this transaction. */
+  performedBy?: string
+  lotId?: string
 }
 
 export type StockLevel = {

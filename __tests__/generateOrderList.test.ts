@@ -7,18 +7,18 @@ import { ItemStage, Unit } from '@/lib/types'
 
 describe('generateOrderList', () => {
   test('lists every non-good fixture item, critical first', () => {
-    const orders = generateOrderList(checkPar(estimateStock(transactions), parLevels), items)
+    const orders = generateOrderList(checkPar(estimateStock(transactions), parLevels, items), items)
     const ids = orders.map((o) => o.item.id)
 
-    expect(orders).toHaveLength(30)
-    expect(ids).not.toContain('raw-beef')
-    expect(ids).not.toContain('soy-sauce')
+    expect(orders).toHaveLength(27)
+    expect(ids).not.toContain('001')
+    expect(ids).not.toContain('009')
     expect(orders[0]).toEqual({
-      item: { id: 'raw-chicken', name: 'raw chicken', stage: ItemStage.BASE_INPUT, unit: Unit.KG },
+      item: { id: '002', name: 'chicken-raw', stage: ItemStage.BASE_INPUT, unit: Unit.KG },
       reason: 'Critical: below 50% of par',
     })
-    expect(orders[29]).toEqual({
-      item: { id: 'beef-marinade', name: 'beef marinade', stage: ItemStage.INTERMEDIARY, unit: Unit.LITER },
+    expect(orders[26]).toEqual({
+      item: { id: '018', name: 'marinade-beef', stage: ItemStage.INTERMEDIARY, unit: Unit.LITER },
       reason: 'Low: below par',
     })
   })
@@ -26,9 +26,9 @@ describe('generateOrderList', () => {
   test('skips good statuses and unknown item ids', () => {
     const orders = generateOrderList(
       [
-        { itemId: 'raw-beef', status: 'good' },
-        { itemId: 'beef-marinade', status: 'low' },
-        { itemId: 'eggs', status: 'critical' },
+        { itemId: '001', status: 'good' },
+        { itemId: '018', status: 'low' },
+        { itemId: '007', status: 'critical' },
         { itemId: 'not-an-item', status: 'critical' },
       ],
       items,
@@ -36,11 +36,11 @@ describe('generateOrderList', () => {
 
     expect(orders).toEqual([
       {
-        item: { id: 'eggs', name: 'eggs', stage: ItemStage.BASE_INPUT, unit: Unit.UNIT },
+        item: { id: '007', name: 'eggs', stage: ItemStage.BASE_INPUT, unit: Unit.UNIT },
         reason: 'Critical: below 50% of par',
       },
       {
-        item: { id: 'beef-marinade', name: 'beef marinade', stage: ItemStage.INTERMEDIARY, unit: Unit.LITER },
+        item: { id: '018', name: 'marinade-beef', stage: ItemStage.INTERMEDIARY, unit: Unit.LITER },
         reason: 'Low: below par',
       },
     ])
