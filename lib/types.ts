@@ -26,6 +26,8 @@ export type Item = {
 export type Lot = {
   id: string
   itemId: string
+  /** Current quantity in the item's stock unit. Maintained by the ledger trigger. */
+  balance: number
   /** ISO 8601 timestamp. */
   createdAt: string
   /** ISO 8601 timestamp. */

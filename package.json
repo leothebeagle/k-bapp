@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:sql": "tsx scripts/sql.ts"
+    "db:sql": "tsx scripts/sql.ts",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:reset": "tsx scripts/seed.ts --reset"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.11",

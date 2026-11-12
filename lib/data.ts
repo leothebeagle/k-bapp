@@ -1,0 +1,143 @@
+import { query } from './db'
+import type { Item, ItemStage, Lot, Transaction, TransactionType, Unit } from './types'
+
+// Numeric columns are cast to float8 in SQL so both drivers (pg and PGlite)
+// return JS numbers; pg returns `numeric` as a string. Timestamps come back
+// as Date objects and are converted to ISO strings here.
+
+function toIso(value: Date | string): string {
+  return new Date(value).toISOString()
+}
+
+/** "YYYY-MM-DD" in UTC, matching the UTC formatting used in app/stock/format.ts. */
+function toDate(value: Date | string): string {
+  return toIso(value).slice(0, 10)
+}
+
+type ItemRow = {
+  id: string
+  name: string
+  stage: ItemStage
+  stock_unit: Unit
+  shelf_life_days: number
+}
+
+export async function listItems(): Promise<Item[]> {
+  const rows = await query<ItemRow>(
+    `SELECT id, name, stage, stock_unit, shelf_life_days
+     FROM items
+     ORDER BY id`,
+  )
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    stage: r.stage,
+    stockUnit: r.stock_unit,
+    shelfLifeDays: r.shelf_life_days,
+  }))
+}
+
+type LotRow = {
+  id: string
+  item_id: string
+  balance: number
+  created_at: Date
+  expires_at: Date
+  finished_at: Date | null
+}
+
+export async function listLots(): Promise<Lot[]> {
+  const rows = await query<LotRow>(
+    `SELECT id, item_id, balance::float8 AS balance, created_at, expires_at, finished_at
+     FROM lots
+     ORDER BY created_at, id`,
+  )
+  return rows.map((r) => ({
+    id: r.id,
+    itemId: r.item_id,
+    balance: Number(r.balance),
+    createdAt: toIso(r.created_at),
+    expiresAt: toIso(r.expires_at),
+    finishedAt: r.finished_at === null ? null : toIso(r.finished_at),
+  }))
+}
+
+type TransactionRow = {
+  id: string
+  lot_id: string
+  quantity: number
+  type: TransactionType
+  timestamp: Date
+  performed_by: string | null
+  notes: string | null
+}
+
+export async function listTransactions(): Promise<Transaction[]> {
+  const rows = await query<TransactionRow>(
+    `SELECT id, lot_id, quantity::float8 AS quantity, type, timestamp, performed_by, notes
+     FROM transactions
+     ORDER BY timestamp, id`,
+  )
+  return rows.map((r) => ({
+    id: r.id,
+    lotId: r.lot_id,
+    quantity: Number(r.quantity),
+    type: r.type,
+    timestamp: toIso(r.timestamp),
+    // Optional in the type, so omit rather than send null.
+    ...(r.performed_by !== null && { performedBy: r.performed_by }),
+    ...(r.notes !== null && { notes: r.notes }),
+  }))
+}
+
+export type StockEntry = {
+  summary: { item: string; total: string }
+  details: { lot: string; balance: number; created: string; expires: string }[]
+}
+
+type StockRow = {
+  item_id: string
+  item_name: string
+  stock_unit: Unit
+  lot_id: string
+  balance: number
+  created_at: Date
+  expires_at: Date
+}
+
+/** One entry per item that has active (unfinished) lots, with those lots as details. */
+export async function getStock(): Promise<StockEntry[]> {
+  const rows = await query<StockRow>(
+    `SELECT i.id AS item_id, i.name AS item_name, i.stock_unit,
+            l.id AS lot_id, l.balance::float8 AS balance, l.created_at, l.expires_at
+     FROM lots l
+     JOIN items i ON i.id = l.item_id
+     WHERE l.finished_at IS NULL
+     ORDER BY i.name, l.created_at, l.id`,
+  )
+
+  const byItem = new Map<string, { name: string; unit: Unit; lots: StockRow[] }>()
+  for (const row of rows) {
+    let group = byItem.get(row.item_id)
+    if (!group) {
+      group = { name: row.item_name, unit: row.stock_unit, lots: [] }
+      byItem.set(row.item_id, group)
+    }
+    group.lots.push(row)
+  }
+
+  return Array.from(byItem.values(), ({ name, unit, lots }) => {
+    const sum = lots.reduce((acc, l) => acc + Number(l.balance), 0)
+    // Round away float noise from adding decimals (e.g. 0.1 + 0.2).
+    const total = Math.round(sum * 1e6) / 1e6
+    return {
+      summary: { item: name, total: `${total} ${unit}` },
+      details: lots.map((l) => ({
+        lot: l.lot_id,
+        balance: Number(l.balance),
+        created: toDate(l.created_at),
+        expires: toDate(l.expires_at),
+      })),
+    }
+  })
+}

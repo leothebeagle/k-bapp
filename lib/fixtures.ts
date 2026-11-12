@@ -51,6 +51,7 @@ export const lots: Lot[] = [
   {
     id: 'L9',
     itemId: '001',
+    balance: 0,
     createdAt: '2026-11-08T09:00:00Z',
     expiresAt: '2026-11-12T09:00:00Z',
     finishedAt: '2026-11-12T10:00:00Z',
@@ -58,6 +59,7 @@ export const lots: Lot[] = [
   {
     id: 'L20',
     itemId: '003',
+    balance: 3.8,
     createdAt: '2026-11-11T09:00:00Z',
     expiresAt: '2027-05-10T09:00:00Z',
     finishedAt: null,
@@ -65,6 +67,7 @@ export const lots: Lot[] = [
   {
     id: 'L21',
     itemId: '002',
+    balance: 1.3,
     createdAt: '2026-11-11T09:00:00Z',
     expiresAt: '2027-11-11T09:00:00Z',
     finishedAt: null,
@@ -72,6 +75,7 @@ export const lots: Lot[] = [
   {
     id: 'L22',
     itemId: '001',
+    balance: 9.5,
     createdAt: '2026-11-11T09:00:00Z',
     expiresAt: '2026-11-15T09:00:00Z',
     finishedAt: null,
@@ -79,6 +83,7 @@ export const lots: Lot[] = [
   {
     id: 'L23',
     itemId: '004',
+    balance: 0,
     createdAt: '2026-11-11T14:00:00Z',
     expiresAt: '2026-11-16T14:00:00Z',
     finishedAt: '2026-11-13T10:00:00Z',
@@ -86,6 +91,7 @@ export const lots: Lot[] = [
   {
     id: 'L24',
     itemId: '005',
+    balance: 5,
     createdAt: '2026-11-13T10:00:00Z',
     expiresAt: '2026-11-15T10:00:00Z',
     finishedAt: null,
