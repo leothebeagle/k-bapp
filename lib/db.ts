@@ -6,6 +6,12 @@ export type Row = Record<string, unknown>
 
 export interface Db {
   query<T extends Row = Row>(sql: string, params?: unknown[]): Promise<T[]>
+  /**
+   * Runs a script that may contain several statements, without parameters.
+   * Postgres runs the whole script as one implicit transaction unless it
+   * contains its own BEGIN/COMMIT.
+   */
+  exec(sql: string): Promise<void>
   close(): Promise<void>
 }
 
@@ -14,6 +20,9 @@ function fromPool(pool: Pool): Db {
     async query<T extends Row = Row>(sql: string, params?: unknown[]) {
       const result = await pool.query(sql, params)
       return result.rows as T[]
+    },
+    async exec(sql: string) {
+      await pool.query(sql)
     },
     close: () => pool.end(),
   }
@@ -24,6 +33,9 @@ function fromPGlite(pglite: PGlite): Db {
     async query<T extends Row = Row>(sql: string, params?: unknown[]) {
       const result = await pglite.query<T>(sql, params)
       return result.rows
+    },
+    async exec(sql: string) {
+      await pglite.exec(sql)
     },
     close: () => pglite.close(),
   }
@@ -41,7 +53,8 @@ function createDefaultDb(): Db {
 // connection pool or a second PGlite instance on the same data directory.
 const globalForDb = globalThis as typeof globalThis & { __kbappDb?: Db }
 
-function getDb(): Db {
+/** The shared default database (DATABASE_URL, or local PGlite in .pglite/). */
+export function getDb(): Db {
   if (!globalForDb.__kbappDb) {
     globalForDb.__kbappDb = createDefaultDb()
   }
