@@ -40,25 +40,30 @@ export async function listItems(): Promise<Item[]> {
 type LotRow = {
   id: string
   item_id: string
+  starting_quantity: number
   balance: number
   created_at: Date
   expires_at: Date
   finished_at: Date | null
+  active: boolean
 }
 
 export async function listLots(): Promise<Lot[]> {
   const rows = await query<LotRow>(
-    `SELECT id, item_id, balance::float8 AS balance, created_at, expires_at, finished_at
+    `SELECT id, item_id, starting_quantity::float8 AS starting_quantity,
+            balance::float8 AS balance, created_at, expires_at, finished_at, active
      FROM lots
      ORDER BY created_at, id`,
   )
   return rows.map((r) => ({
     id: r.id,
     itemId: r.item_id,
+    startingQuantity: Number(r.starting_quantity),
     balance: Number(r.balance),
     createdAt: toIso(r.created_at),
     expiresAt: toIso(r.expires_at),
     finishedAt: r.finished_at === null ? null : toIso(r.finished_at),
+    active: r.active,
   }))
 }
 
@@ -92,7 +97,7 @@ export async function listTransactions(): Promise<Transaction[]> {
 
 export type StockEntry = {
   summary: { item: string; total: string }
-  details: { lot: string; balance: number; created: string; expires: string }[]
+  details: { lot: string; starting: number; balance: number; created: string; expires: string }[]
 }
 
 type StockRow = {
@@ -100,19 +105,21 @@ type StockRow = {
   item_name: string
   stock_unit: Unit
   lot_id: string
+  starting_quantity: number
   balance: number
   created_at: Date
   expires_at: Date
 }
 
-/** One entry per item that has active (unfinished) lots, with those lots as details. */
+/** One entry per item that has active lots, with those lots as details. */
 export async function getStock(): Promise<StockEntry[]> {
   const rows = await query<StockRow>(
     `SELECT i.id AS item_id, i.name AS item_name, i.stock_unit,
-            l.id AS lot_id, l.balance::float8 AS balance, l.created_at, l.expires_at
+            l.id AS lot_id, l.starting_quantity::float8 AS starting_quantity,
+            l.balance::float8 AS balance, l.created_at, l.expires_at
      FROM lots l
      JOIN items i ON i.id = l.item_id
-     WHERE l.finished_at IS NULL
+     WHERE l.active = true
      ORDER BY i.name, l.created_at, l.id`,
   )
 
@@ -134,6 +141,7 @@ export async function getStock(): Promise<StockEntry[]> {
       summary: { item: name, total: `${total} ${unit}` },
       details: lots.map((l) => ({
         lot: l.lot_id,
+        starting: Number(l.starting_quantity),
         balance: Number(l.balance),
         created: toDate(l.created_at),
         expires: toDate(l.expires_at),

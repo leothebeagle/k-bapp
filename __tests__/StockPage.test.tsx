@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import { cleanup, render, screen, within } from '@testing-library/react'
-import StockTables from '@/app/stock/StockTables'
+import StockPage from '@/app/stock/StockPage'
 
 afterEach(() => {
   cleanup()
@@ -48,7 +48,7 @@ function sectionRows(title: string) {
 
 test('shows Loading… then renders the rows returned by each endpoint', async () => {
   const fetchMock = stubFetch()
-  render(<StockTables />)
+  render(<StockPage />)
 
   expect(screen.getByText('Loading…')).toBeTruthy()
 
@@ -74,7 +74,7 @@ test('shows Loading… then renders the rows returned by each endpoint', async (
 
 test('shows an error message when a request fails', async () => {
   stubFetch('/api/lots')
-  render(<StockTables />)
+  render(<StockPage />)
 
   const alert = await screen.findByRole('alert')
   expect(alert.textContent).toContain('/api/lots responded 500')

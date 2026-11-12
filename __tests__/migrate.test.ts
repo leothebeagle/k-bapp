@@ -43,8 +43,8 @@ describe('migrate', () => {
     await migrate(db)
     await expect(
       db.query(
-        `INSERT INTO lots (id, item_id, created_at, expires_at)
-         VALUES ('lot-1', 'no-such-item', now(), now() + interval '1 day')`,
+        `INSERT INTO lots (id, item_id, starting_quantity, created_at, expires_at)
+         VALUES ('lot-1', 'no-such-item', 0, now(), now() + interval '1 day')`,
       ),
     ).rejects.toThrow(/foreign key/)
   })

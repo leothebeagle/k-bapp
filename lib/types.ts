@@ -26,6 +26,8 @@ export type Item = {
 export type Lot = {
   id: string
   itemId: string
+  /** Quantity the lot started with, in the item's stock unit. Set on creation, never changed. */
+  startingQuantity: number
   /** Current quantity in the item's stock unit. Maintained by the ledger trigger. */
   balance: number
   /** ISO 8601 timestamp. */
@@ -34,6 +36,8 @@ export type Lot = {
   expiresAt: string
   /** ISO 8601 timestamp, or null while the lot is active. */
   finishedAt: string | null
+  /** True while finishedAt is null. Derived by the database, never written directly. */
+  active: boolean
 }
 
 export type TransactionType = 'restock' | 'batch_made' | 'consumed' | 'adjustment' | 'sale'

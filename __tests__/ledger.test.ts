@@ -31,8 +31,8 @@ describe('ledger', () => {
        VALUES ('item-1', 'Flour', 'BASE_INPUT', 'KG', 180)`,
     )
     await db.query(
-      `INSERT INTO lots (id, item_id, created_at, expires_at)
-       VALUES ('lot-1', 'item-1', now(), now() + interval '180 days')`,
+      `INSERT INTO lots (id, item_id, starting_quantity, created_at, expires_at)
+       VALUES ('lot-1', 'item-1', 0, now(), now() + interval '180 days')`,
     )
   })
 

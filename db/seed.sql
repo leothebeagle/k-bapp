@@ -1,21 +1,22 @@
 -- Minimal seed data: one item, two lots, three transactions.
--- Runs as one script (one implicit transaction). Lot balances are not set
--- here: each transaction insert moves its lot's balance via the ledger trigger
+-- Runs as one script (one implicit transaction). Each lot's starting_quantity
+-- is set on insert (L-1: 5, L-2: 10). Lot balances are not set here: each
+-- transaction insert moves its lot's balance via the ledger trigger
 -- (L-1: +5 -2 = 3, L-2: +10 = 10). L-1 and T-1 are dated one day ago; L-2,
 -- T-2 and T-3 are dated now, so nothing is in the future.
 
 INSERT INTO items (id, name, stage, stock_unit, shelf_life_days)
 VALUES ('001', 'beef-raw', 'BASE_INPUT', 'KG', 4);
 
-INSERT INTO lots (id, item_id, created_at, expires_at)
-SELECT 'L-1', id,
+INSERT INTO lots (id, item_id, starting_quantity, created_at, expires_at)
+SELECT 'L-1', id, 5,
        now() - interval '1 day',
        now() - interval '1 day' + make_interval(days => shelf_life_days)
 FROM items
 WHERE id = '001';
 
-INSERT INTO lots (id, item_id, created_at, expires_at)
-SELECT 'L-2', id, now(), now() + make_interval(days => shelf_life_days)
+INSERT INTO lots (id, item_id, starting_quantity, created_at, expires_at)
+SELECT 'L-2', id, 10, now(), now() + make_interval(days => shelf_life_days)
 FROM items
 WHERE id = '001';
 

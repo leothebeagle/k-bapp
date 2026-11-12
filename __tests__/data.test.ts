@@ -15,15 +15,15 @@ const L2_CREATED = '2026-03-02T08:00:00.000Z'
 const L2_EXPIRES = '2026-03-06T08:00:00.000Z'
 const T3_TIME = '2026-03-02T12:00:00.000Z'
 
-/** One item; L-1 gets +5 restock then -2 consumed, L-2 gets +10 restock. */
+/** One item; L-1 starts at 5 (+5 restock, -2 consumed), L-2 starts at 10 (+10 restock). */
 async function insertFixtures(db: Db): Promise<void> {
   await db.query(
     `INSERT INTO items (id, name, stage, stock_unit, shelf_life_days)
      VALUES ('001', 'beef-raw', 'BASE_INPUT', 'KG', 4)`,
   )
   await db.query(
-    `INSERT INTO lots (id, item_id, created_at, expires_at)
-     VALUES ('L-1', '001', $1, $2), ('L-2', '001', $3, $4)`,
+    `INSERT INTO lots (id, item_id, starting_quantity, created_at, expires_at)
+     VALUES ('L-1', '001', 5, $1, $2), ('L-2', '001', 10, $3, $4)`,
     [L1_CREATED, L1_EXPIRES, L2_CREATED, L2_EXPIRES],
   )
   await db.query(
@@ -56,25 +56,63 @@ describe('data', () => {
     ])
   })
 
-  it('listLots returns lots with a numeric balance and ISO timestamps', async () => {
+  it('listLots returns lots with numeric quantities and ISO timestamps', async () => {
     expect(await listLots()).toEqual([
       {
         id: 'L-1',
         itemId: '001',
+        startingQuantity: 5,
         balance: 3,
         createdAt: L1_CREATED,
         expiresAt: L1_EXPIRES,
         finishedAt: null,
+        active: true,
       },
       {
         id: 'L-2',
         itemId: '001',
+        startingQuantity: 10,
         balance: 10,
         createdAt: L2_CREATED,
         expiresAt: L2_EXPIRES,
         finishedAt: null,
+        active: true,
       },
     ])
+  })
+
+  it('rejects changing starting_quantity after the lot is created', async () => {
+    await expect(
+      db.query(`UPDATE lots SET starting_quantity = 6 WHERE id = 'L-1'`),
+    ).rejects.toThrow(/starting_quantity cannot change/)
+    expect((await listLots()).map((l) => l.startingQuantity)).toEqual([5, 10])
+  })
+
+  it('a lot with no finished_at is active', async () => {
+    const lot = (await listLots()).find((l) => l.id === 'L-1')
+    expect(lot).toMatchObject({ finishedAt: null, active: true })
+  })
+
+  it('setting finished_at makes the lot inactive and drops it from getStock', async () => {
+    const finished = '2026-03-03T08:00:00.000Z'
+    await db.query(`UPDATE lots SET finished_at = $1 WHERE id = 'L-1'`, [finished])
+
+    const lot = (await listLots()).find((l) => l.id === 'L-1')
+    expect(lot).toMatchObject({ finishedAt: finished, active: false })
+    expect((await getStock())[0].details.map((d) => d.lot)).toEqual(['L-2'])
+  })
+
+  it('rejects setting active directly', async () => {
+    await expect(
+      db.query(`UPDATE lots SET active = false WHERE id = 'L-1'`),
+    ).rejects.toThrow(/column "active"/)
+    await expect(
+      db.query(
+        `INSERT INTO lots (id, item_id, starting_quantity, created_at, expires_at, active)
+         VALUES ('L-3', '001', 1, now(), now() + interval '1 day', false)`,
+      ),
+    ).rejects.toThrow(/column "active"/)
+    expect((await listLots()).map((l) => l.active)).toEqual([true, true])
   })
 
   it('listTransactions returns transactions with a numeric quantity', async () => {
@@ -90,8 +128,8 @@ describe('data', () => {
       {
         summary: { item: 'beef-raw', total: '13 KG' },
         details: [
-          { lot: 'L-1', balance: 3, created: '2026-03-01', expires: '2026-03-05' },
-          { lot: 'L-2', balance: 10, created: '2026-03-02', expires: '2026-03-06' },
+          { lot: 'L-1', starting: 5, balance: 3, created: '2026-03-01', expires: '2026-03-05' },
+          { lot: 'L-2', starting: 10, balance: 10, created: '2026-03-02', expires: '2026-03-06' },
         ],
       },
     ])

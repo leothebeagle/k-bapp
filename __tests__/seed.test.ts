@@ -16,10 +16,17 @@ describe('seed', () => {
     return row
   }
 
-  async function lotBalances(): Promise<number[]> {
-    const rows = await db.query<{ balance: string }>(`SELECT balance::text AS balance FROM lots ORDER BY id`)
-    return rows.map((r) => Number(r.balance))
+  async function lotQuantities() {
+    const rows = await db.query<{ id: string; starting: string; balance: string }>(
+      `SELECT id, starting_quantity::text AS starting, balance::text AS balance FROM lots ORDER BY id`,
+    )
+    return rows.map((r) => ({ id: r.id, starting: Number(r.starting), balance: Number(r.balance) }))
   }
+
+  const SEEDED_LOTS = [
+    { id: 'L-1', starting: 5, balance: 3 },
+    { id: 'L-2', starting: 10, balance: 10 },
+  ]
 
   beforeEach(async () => {
     db = createTestDb()
@@ -30,10 +37,10 @@ describe('seed', () => {
     await db.close()
   })
 
-  it('inserts 1 item, 2 lots (L-1 balance 3, L-2 balance 10), and 3 transactions', async () => {
+  it('inserts 1 item, 2 lots (L-1 starting 5 balance 3, L-2 starting 10 balance 10), and 3 transactions', async () => {
     await seed(db)
     expect(await counts()).toEqual({ items: 1, lots: 2, transactions: 3 })
-    expect(await lotBalances()).toEqual([3, 10])
+    expect(await lotQuantities()).toEqual(SEEDED_LOTS)
 
     const items = await db.query(`SELECT id, name FROM items`)
     expect(items).toEqual([{ id: '001', name: 'beef-raw' }])
@@ -87,6 +94,6 @@ describe('seed', () => {
 
     await reset(db)
     expect(await counts()).toEqual({ items: 1, lots: 2, transactions: 3 })
-    expect(await lotBalances()).toEqual([3, 10])
+    expect(await lotQuantities()).toEqual(SEEDED_LOTS)
   })
 })

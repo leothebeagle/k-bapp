@@ -28,7 +28,7 @@ function Section({ title, className = '', children }: { title: string; className
   )
 }
 
-export default function StockTables() {
+export default function StockPage() {
   const [data, setData] = useState<Data | null>(null)
   const [error, setError] = useState<string | null>(null)
 
