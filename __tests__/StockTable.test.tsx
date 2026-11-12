@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vitest'
 import { cleanup, fireEvent, render, within } from '@testing-library/react'
-import StockTable from '@/app/stock/StockTable'
+import StockTable from '@/app/_components/tables/StockTable'
 
 afterEach(cleanup)
 

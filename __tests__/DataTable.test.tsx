@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vitest'
 import { cleanup, render, within } from '@testing-library/react'
-import DataTable from '@/app/stock/DataTable'
+import DataTable from '@/app/_components/tables/DataTable'
 
 afterEach(cleanup)
 

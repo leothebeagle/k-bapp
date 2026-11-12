@@ -54,7 +54,7 @@ export default function StockTable({ rows }: { rows: ExpandableRow[] }) {
               </tr>
               {isOpen && (
                 <tr className="bg-zinc-50">
-                  <td></td>
+                  <td className="px-3"></td>
                   <td colSpan={columns.length} className="px-3 pb-3">
                     <DataTable rows={row.details} />
                   </td>

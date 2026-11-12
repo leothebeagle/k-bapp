@@ -12,7 +12,7 @@ export default function DataTable({ rows }: { rows: Record<string, unknown>[] })
   const columns = Object.keys(rows[0])
 
   return (
-    <table className="w-full text-sm">
+    <table className="w-auto text-sm">
       <thead className="sticky top-0 bg-zinc-100 text-left text-zinc-600">
         <tr>
           {columns.map((key) => (
