@@ -1,4 +1,3 @@
-import { items } from '@/lib/fixtures'
 import StockTable from './StockTable'
 import DataTable from './DataTable'
 
@@ -15,7 +14,7 @@ export default function StockPage() {
   return (
     <main className="flex flex-1 flex-col gap-4 bg-zinc-50 p-4 text-zinc-900">
       <Section title="Stock" className="min-h-[33vh]">
-        <StockTable stock={[]} items={items} />
+        <StockTable rows={[]} />
       </Section>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

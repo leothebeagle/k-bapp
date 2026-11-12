@@ -1,6 +1,6 @@
 const cellBase = 'px-3 py-2'
 
-function formatCell(value: unknown): string | number {
+export function formatCell(value: unknown): string | number {
   if (value === null || value === undefined) return ''
   if (typeof value === 'string' || typeof value === 'number') return value
   return JSON.stringify(value)

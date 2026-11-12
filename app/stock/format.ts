@@ -2,8 +2,3 @@
 export function formatDateTime(iso: string): string {
   return iso.slice(0, 16).replace('T', ' ')
 }
-
-/** Formats an ISO timestamp as "YYYY-MM-DD". */
-export function formatDate(iso: string): string {
-  return iso.slice(0, 10)
-}

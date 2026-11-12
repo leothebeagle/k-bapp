@@ -1,19 +1,25 @@
 'use client'
 
 import { Fragment, useState } from 'react'
-import type { Item } from '@/lib/types'
-import type { StockEntry } from '@/lib/fixtures'
-import { formatDate } from './format'
+import DataTable, { formatCell } from './DataTable'
 
-export default function StockTable({ stock, items }: { stock: StockEntry[]; items: Item[] }) {
-  const [open, setOpen] = useState<Set<string>>(new Set())
-  const itemById = new Map(items.map((i) => [i.id, i]))
+export type ExpandableRow = {
+  summary: Record<string, unknown>
+  details: Record<string, unknown>[]
+}
 
-  function toggle(itemId: string) {
+export default function StockTable({ rows }: { rows: ExpandableRow[] }) {
+  const [open, setOpen] = useState<Set<number>>(new Set())
+
+  if (rows.length === 0) return null
+
+  const columns = Object.keys(rows[0].summary)
+
+  function toggle(index: number) {
     setOpen((prev) => {
       const next = new Set(prev)
-      if (next.has(itemId)) next.delete(itemId)
-      else next.add(itemId)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
       return next
     })
   }
@@ -23,52 +29,34 @@ export default function StockTable({ stock, items }: { stock: StockEntry[]; item
       <thead className="bg-zinc-100 text-left text-zinc-600">
         <tr>
           <th className="w-8 px-3 py-2"></th>
-          <th className="px-3 py-2">Item</th>
-          <th className="px-3 py-2 text-right">Total</th>
+          {columns.map((key) => (
+            <th key={key} className="px-3 py-2">
+              {key}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
-        {stock.map((entry) => {
-          const item = itemById.get(entry.itemId)
-          const isOpen = open.has(entry.itemId)
+        {rows.map((row, index) => {
+          const isOpen = open.has(index)
           return (
-            <Fragment key={entry.itemId}>
+            <Fragment key={index}>
               <tr
                 className="cursor-pointer border-t border-zinc-200 hover:bg-zinc-50"
-                onClick={() => toggle(entry.itemId)}
+                onClick={() => toggle(index)}
               >
                 <td className="px-3 py-2 text-zinc-400">{isOpen ? '▾' : '▸'}</td>
-                <td className="px-3 py-2 font-medium">{item?.name ?? entry.itemId}</td>
-                <td className="px-3 py-2 text-right tabular-nums">
-                  {entry.total} {item?.stockUnit}
-                </td>
+                {columns.map((key) => (
+                  <td key={key} className="px-3 py-2">
+                    {formatCell(row.summary[key])}
+                  </td>
+                ))}
               </tr>
               {isOpen && (
                 <tr className="bg-zinc-50">
                   <td></td>
-                  <td colSpan={2} className="px-3 pb-3">
-                    <table className="w-full text-xs">
-                      <thead className="text-left text-zinc-500">
-                        <tr>
-                          <th className="px-2 py-1">Lot</th>
-                          <th className="px-2 py-1 text-right">Balance</th>
-                          <th className="px-2 py-1">Created</th>
-                          <th className="px-2 py-1">Expires</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {entry.lots.map((lot) => (
-                          <tr key={lot.lotId} className="border-t border-zinc-200">
-                            <td className="px-2 py-1">{lot.lotId}</td>
-                            <td className="px-2 py-1 text-right tabular-nums">
-                              {lot.balance} {item?.stockUnit}
-                            </td>
-                            <td className="px-2 py-1">{formatDate(lot.createdAt)}</td>
-                            <td className="px-2 py-1">{formatDate(lot.expiresAt)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <td colSpan={columns.length} className="px-3 pb-3">
+                    <DataTable rows={row.details} />
                   </td>
                 </tr>
               )}
