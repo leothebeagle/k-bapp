@@ -1,128 +1,253 @@
-import { Item, ItemStage, ParLevel, Transaction, Unit } from './types'
+import { Item, ItemStage, Lot, Transaction, Unit } from './types';
 
-const { BASE_INPUT, INTERMEDIARY, PRODUCTION_READY, FINAL_PRODUCT } = ItemStage
+const { BASE_INPUT, INTERMEDIARY } = ItemStage;
 
 export const items: Item[] = [
-  // BASE_INPUT
-  { id: '001', name: 'beef-raw', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '002', name: 'chicken-raw', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '003', name: 'tuna-canned', stage: BASE_INPUT, unit: Unit.UNIT },
-  { id: '004', name: 'rice-raw', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '005', name: 'spinach-raw', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '006', name: 'carrots-raw', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '007', name: 'eggs', stage: BASE_INPUT, unit: Unit.UNIT },
-  { id: '008', name: 'nori-bulk', stage: BASE_INPUT, unit: Unit.UNIT },
-  { id: '009', name: 'soy-sauce', stage: BASE_INPUT, unit: Unit.LITER },
-  { id: '010', name: 'sesame-oil', stage: BASE_INPUT, unit: Unit.LITER },
-  { id: '011', name: 'sugar', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '012', name: 'gochujang', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '013', name: 'garlic-cloves', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '014', name: 'ginger', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '015', name: 'salt', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '016', name: 'pepper', stage: BASE_INPUT, unit: Unit.KG },
-  { id: '017', name: 'beef-powder', stage: BASE_INPUT, unit: Unit.KG },
+  {
+    id: '001',
+    name: 'beef-raw',
+    stage: BASE_INPUT,
+    stockUnit: Unit.KG,
+    shelfLifeDays: 4,
+  },
+  {
+    id: '002',
+    name: 'soy-sauce',
+    stage: BASE_INPUT,
+    stockUnit: Unit.LITER,
+    shelfLifeDays: 365,
+  },
+  {
+    id: '003',
+    name: 'sugar',
+    stage: BASE_INPUT,
+    stockUnit: Unit.KG,
+    shelfLifeDays: 180,
+  },
+  {
+    id: '004',
+    name: 'marinade-beef',
+    stage: INTERMEDIARY,
+    stockUnit: Unit.LITER,
+    shelfLifeDays: 5,
+  },
+  {
+    id: '005',
+    name: 'beef-marinated',
+    stage: INTERMEDIARY,
+    stockUnit: Unit.KG,
+    shelfLifeDays: 4,
+  },
+  {
+    id: '006',
+    name: 'sesame oil',
+    stage: INTERMEDIARY,
+    stockUnit: Unit.LITER,
+    shelfLifeDays: 365,
+  },
+];
 
-  // INTERMEDIARY
-  { id: '018', name: 'marinade-beef', stage: INTERMEDIARY, unit: Unit.LITER },
-  { id: '019', name: 'marinade-chicken', stage: INTERMEDIARY, unit: Unit.LITER },
-
-  // PRODUCTION_READY
-  { id: '020', name: 'beef-cooked', stage: PRODUCTION_READY, unit: Unit.KG },
-  { id: '021', name: 'chicken-cooked', stage: PRODUCTION_READY, unit: Unit.KG },
-  { id: '022', name: 'tuna-filling', stage: PRODUCTION_READY, unit: Unit.KG },
-  { id: '023', name: 'rice-cooked', stage: PRODUCTION_READY, unit: Unit.KG },
-  { id: '024', name: 'spinach-cooked', stage: PRODUCTION_READY, unit: Unit.KG },
-  { id: '025', name: 'carrots-cooked', stage: PRODUCTION_READY, unit: Unit.KG },
-  { id: '026', name: 'radish-pickled', stage: PRODUCTION_READY, unit: Unit.KG },
-  { id: '027', name: 'crabsticks', stage: PRODUCTION_READY, unit: Unit.UNIT },
-  { id: '028', name: 'eggs-cooked', stage: PRODUCTION_READY, unit: Unit.PORTION },
-  { id: '029', name: 'nori-portioned', stage: PRODUCTION_READY, unit: Unit.PORTION },
-
-  // FINAL_PRODUCT
-  { id: '030', name: 'kimbap-beef', stage: FINAL_PRODUCT, unit: Unit.ROLL, madeToOrder: true },
-  { id: '031', name: 'kimbap-chicken-spicy', stage: FINAL_PRODUCT, unit: Unit.ROLL, madeToOrder: true },
-  { id: '032', name: 'kimbap-tuna', stage: FINAL_PRODUCT, unit: Unit.ROLL, madeToOrder: true },
-]
-
-/** Minimum on-hand quantities for one service day plus a buffer. */
-export const parLevels: ParLevel[] = [
-  // BASE_INPUT
-  { itemId: '001', minQuantity: 10, unit: Unit.KG },
-  { itemId: '002', minQuantity: 10, unit: Unit.KG },
-  { itemId: '003', minQuantity: 24, unit: Unit.UNIT },
-  { itemId: '004', minQuantity: 20, unit: Unit.KG },
-  { itemId: '005', minQuantity: 3, unit: Unit.KG },
-  { itemId: '006', minQuantity: 4, unit: Unit.KG },
-  { itemId: '007', minQuantity: 60, unit: Unit.UNIT },
-  { itemId: '008', minQuantity: 200, unit: Unit.UNIT },
-  { itemId: '009', minQuantity: 5, unit: Unit.LITER },
-  { itemId: '010', minQuantity: 2, unit: Unit.LITER },
-  { itemId: '011', minQuantity: 3, unit: Unit.KG },
-  { itemId: '012', minQuantity: 2, unit: Unit.KG },
-  { itemId: '013', minQuantity: 1, unit: Unit.KG },
-  { itemId: '014', minQuantity: 0.5, unit: Unit.KG },
-  { itemId: '015', minQuantity: 1, unit: Unit.KG },
-  { itemId: '016', minQuantity: 0.25, unit: Unit.KG },
-  { itemId: '017', minQuantity: 0.5, unit: Unit.KG },
-
-  // INTERMEDIARY
-  { itemId: '018', minQuantity: 6, unit: Unit.LITER },
-  { itemId: '019', minQuantity: 6, unit: Unit.LITER },
-
-  // PRODUCTION_READY
-  { itemId: '020', minQuantity: 4, unit: Unit.KG },
-  { itemId: '021', minQuantity: 4, unit: Unit.KG },
-  { itemId: '022', minQuantity: 2, unit: Unit.KG },
-  { itemId: '023', minQuantity: 12, unit: Unit.KG },
-  { itemId: '024', minQuantity: 1.5, unit: Unit.KG },
-  { itemId: '025', minQuantity: 1.5, unit: Unit.KG },
-  { itemId: '026', minQuantity: 2, unit: Unit.KG },
-  { itemId: '027', minQuantity: 50, unit: Unit.UNIT },
-  { itemId: '028', minQuantity: 60, unit: Unit.PORTION },
-  { itemId: '029', minQuantity: 80, unit: Unit.PORTION },
-
-  // FINAL_PRODUCT
-  { itemId: '030', minQuantity: 30, unit: Unit.ROLL },
-  { itemId: '031', minQuantity: 30, unit: Unit.ROLL },
-  { itemId: '032', minQuantity: 20, unit: Unit.ROLL },
-]
+export const lots: Lot[] = [
+  {
+    id: 'L9',
+    itemId: '001',
+    createdAt: '2026-11-08T09:00:00Z',
+    expiresAt: '2026-11-12T09:00:00Z',
+    finishedAt: '2026-11-12T10:00:00Z',
+  },
+  {
+    id: 'L20',
+    itemId: '003',
+    createdAt: '2026-11-11T09:00:00Z',
+    expiresAt: '2027-05-10T09:00:00Z',
+    finishedAt: null,
+  },
+  {
+    id: 'L21',
+    itemId: '002',
+    createdAt: '2026-11-11T09:00:00Z',
+    expiresAt: '2027-11-11T09:00:00Z',
+    finishedAt: null,
+  },
+  {
+    id: 'L22',
+    itemId: '001',
+    createdAt: '2026-11-11T09:00:00Z',
+    expiresAt: '2026-11-15T09:00:00Z',
+    finishedAt: null,
+  },
+  {
+    id: 'L23',
+    itemId: '004',
+    createdAt: '2026-11-11T14:00:00Z',
+    expiresAt: '2026-11-16T14:00:00Z',
+    finishedAt: '2026-11-13T10:00:00Z',
+  },
+  {
+    id: 'L24',
+    itemId: '005',
+    createdAt: '2026-11-13T10:00:00Z',
+    expiresAt: '2026-11-15T10:00:00Z',
+    finishedAt: null,
+  },
+];
 
 export const transactions: Transaction[] = [
-  // One supplier delivery covering two items (one transaction per item).
   {
-    id: 'txn-001',
-    itemId: '001',
-    quantity: 15,
-    unit: Unit.KG,
+    id: 'T39',
+    lotId: 'L9',
+    quantity: 1.5,
     type: 'restock',
-    timestamp: '2026-11-09T07:30:00.000Z',
-    notes: 'Morning supplier delivery',
+    timestamp: '2026-11-08T09:00:00Z',
   },
   {
-    id: 'txn-002',
-    itemId: '009',
-    quantity: 6,
-    unit: Unit.LITER,
-    type: 'restock',
-    timestamp: '2026-11-09T07:30:00.000Z',
-    notes: 'Morning supplier delivery',
-  },
-  {
-    id: 'txn-003',
-    itemId: '018',
+    id: 'T40',
+    lotId: 'L20',
     quantity: 4,
-    unit: Unit.LITER,
-    type: 'batch_made',
-    timestamp: '2026-11-09T09:00:00.000Z',
-    notes: 'Prepped one 4 L batch of beef marinade',
+    type: 'restock',
+    timestamp: '2026-11-11T09:00:00Z',
+    notes: 'Supply run',
   },
   {
-    id: 'txn-004',
-    itemId: '030',
-    quantity: -10,
-    unit: Unit.ROLL,
-    type: 'sale',
-    timestamp: '2026-11-09T12:15:00.000Z',
-    notes: 'Lunch service',
+    id: 'T41',
+    lotId: 'L21',
+    quantity: 1.8,
+    type: 'restock',
+    timestamp: '2026-11-11T09:00:00Z',
+    notes: 'Supply run',
   },
-]
+  {
+    id: 'T42',
+    lotId: 'L22',
+    quantity: 14.5,
+    type: 'restock',
+    timestamp: '2026-11-11T09:00:00Z',
+    notes: 'Supply run',
+  },
+  {
+    id: 'T43',
+    lotId: 'L21',
+    quantity: -0.5,
+    type: 'consumed',
+    timestamp: '2026-11-11T14:00:00Z',
+    notes: 'Beef marinade',
+  },
+  {
+    id: 'T44',
+    lotId: 'L20',
+    quantity: -0.2,
+    type: 'consumed',
+    timestamp: '2026-11-11T14:00:00Z',
+    notes: 'Beef marinade',
+  },
+  {
+    id: 'T45',
+    lotId: 'L23',
+    quantity: 0.6,
+    type: 'batch_made',
+    timestamp: '2026-11-11T14:00:00Z',
+    notes: 'Beef marinade',
+  },
+  {
+    id: 'T46',
+    lotId: 'L9',
+    quantity: -1.5,
+    type: 'adjustment',
+    timestamp: '2026-11-12T10:00:00Z',
+    notes: 'Expired, discarded',
+  },
+  {
+    id: 'T47',
+    lotId: 'L22',
+    quantity: -5,
+    type: 'consumed',
+    timestamp: '2026-11-13T10:00:00Z',
+    notes: 'Marinated beef',
+  },
+  {
+    id: 'T48',
+    lotId: 'L23',
+    quantity: -0.6,
+    type: 'consumed',
+    timestamp: '2026-11-13T10:00:00Z',
+    notes: 'Marinated beef',
+  },
+  {
+    id: 'T49',
+    lotId: 'L24',
+    quantity: 5,
+    type: 'batch_made',
+    timestamp: '2026-11-13T10:00:00Z',
+    notes: 'Marinated beef',
+  },
+];
+
+export type StockLot = {
+  lotId: string;
+  balance: number;
+  /** ISO 8601 timestamp. */
+  createdAt: string;
+  /** ISO 8601 timestamp. */
+  expiresAt: string;
+};
+
+export type StockEntry = {
+  itemId: string;
+  total: number;
+  lots: StockLot[];
+};
+
+/** Hardcoded on-hand stock. Matches the lots and transactions above. */
+export const stock: StockEntry[] = [
+  {
+    itemId: '001',
+    total: 9.5,
+    lots: [
+      {
+        lotId: 'L22',
+        balance: 9.5,
+        createdAt: '2026-11-11T09:00:00Z',
+        expiresAt: '2026-11-15T09:00:00Z',
+      },
+    ],
+  },
+  {
+    itemId: '005',
+    total: 5,
+    lots: [
+      {
+        lotId: 'L24',
+        balance: 5,
+        createdAt: '2026-11-13T10:00:00Z',
+        expiresAt: '2026-11-15T10:00:00Z',
+      },
+    ],
+  },
+  {
+    itemId: '002',
+    total: 1.3,
+    lots: [
+      {
+        lotId: 'L21',
+        balance: 1.3,
+        createdAt: '2026-11-11T09:00:00Z',
+        expiresAt: '2027-11-11T09:00:00Z',
+      },
+    ],
+  },
+  {
+    itemId: '003',
+    total: 3.8,
+    lots: [
+      {
+        lotId: 'L20',
+        balance: 3.8,
+        createdAt: '2026-11-11T09:00:00Z',
+        expiresAt: '2027-05-10T09:00:00Z',
+      },
+    ],
+  },
+];
+
+// transactions should include the data of "consumed by" so that in the future we can track which
+// workflow step in which workflow session consumed it.
