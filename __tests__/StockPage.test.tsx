@@ -11,13 +11,14 @@ const responses: Record<string, unknown> = {
   '/api/stock': [
     {
       summary: { item: 'beef-raw', total: '9.5 KG' },
-      details: [{ lot: 'L22', balance: 9.5, created: '2026-11-11', expires: '2026-11-15' }],
+      details: [{ lot: 'LT-22', balance: 9.5, created: '2026-11-11', expires: '2026-11-15' }],
     },
   ],
   '/api/lots': [
     {
-      id: 'L22',
-      itemId: '001',
+      id: 22,
+      code: 'LT-22',
+      itemId: 1,
       balance: 9.5,
       createdAt: '2026-11-11T09:00:00.000Z',
       expiresAt: '2026-11-15T09:00:00.000Z',
@@ -25,9 +26,9 @@ const responses: Record<string, unknown> = {
     },
   ],
   '/api/transactions': [
-    { id: 'T42', lotId: 'L22', quantity: 14.5, type: 'restock', timestamp: '2026-11-11T09:00:00.000Z' },
+    { id: 42, code: 'TX-42', lotId: 22, quantity: 14.5, type: 'restock', timestamp: '2026-11-11T09:00:00.000Z' },
   ],
-  '/api/items': [{ id: '001', name: 'beef-raw', stage: 'BASE_INPUT', stockUnit: 'KG', shelfLifeDays: 4 }],
+  '/api/items': [{ id: 1, code: 'IT-1', name: 'beef-raw', stage: 'BASE_INPUT', stockUnit: 'KG', shelfLifeDays: 4 }],
 }
 
 function stubFetch(failUrl?: string) {
@@ -55,7 +56,9 @@ test('shows Loading… then renders the rows returned by each endpoint', async (
   await screen.findByRole('heading', { name: 'Stock' })
   expect(screen.queryByText('Loading…')).toBeNull()
 
+  // /api/items twice: once for the Items table, once by RestockForm for its dropdowns.
   expect(fetchMock.mock.calls.map(([url]) => url).sort()).toEqual([
+    '/api/items',
     '/api/items',
     '/api/lots',
     '/api/stock',
@@ -64,12 +67,12 @@ test('shows Loading… then renders the rows returned by each endpoint', async (
 
   expect(sectionRows('Stock')).toEqual([['▸', 'beef-raw', '9.5 KG']])
   expect(sectionRows('Lots')).toEqual([
-    ['L22', '001', '9.5', '2026-11-11T09:00:00.000Z', '2026-11-15T09:00:00.000Z', ''],
+    ['22', 'LT-22', '1', '9.5', '2026-11-11T09:00:00.000Z', '2026-11-15T09:00:00.000Z', ''],
   ])
   expect(sectionRows('Transactions')).toEqual([
-    ['T42', 'L22', '14.5', 'restock', '2026-11-11T09:00:00.000Z'],
+    ['42', 'TX-42', '22', '14.5', 'restock', '2026-11-11T09:00:00.000Z'],
   ])
-  expect(sectionRows('Items')).toEqual([['001', 'beef-raw', 'BASE_INPUT', 'KG', '4']])
+  expect(sectionRows('Items')).toEqual([['1', 'IT-1', 'beef-raw', 'BASE_INPUT', 'KG', '4']])
 })
 
 test('shows an error message when a request fails', async () => {

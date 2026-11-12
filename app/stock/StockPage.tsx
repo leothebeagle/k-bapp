@@ -5,6 +5,7 @@ import type { StockEntry } from '@/lib/data';
 import type { Item, Lot, Transaction } from '@/lib/types';
 import StockTable from '@/app/_components/tables/StockTable';
 import DataTable from '@/app/_components/tables/DataTable';
+import RestockForm from '@/app/_components/forms/RestockForm';
 
 type Data = {
   stock: StockEntry[];
@@ -84,6 +85,8 @@ export default function StockPage() {
       <Section title='Stock' className='w-full'>
         <StockTable rows={data.stock} />
       </Section>
+
+      <RestockForm />
 
       <Section title='Lots'>
         <DataTable rows={data.lots} />

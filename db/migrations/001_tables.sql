@@ -1,5 +1,9 @@
+-- IDs are assigned by the database and cannot be supplied on insert. Each
+-- table also has a readable code derived from its ID (IT-1, LT-1, TX-1).
+
 CREATE TABLE items (
-  id text PRIMARY KEY,
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  code text GENERATED ALWAYS AS ('IT-' || id) STORED UNIQUE,
   name text NOT NULL UNIQUE,
   stage text NOT NULL
     CHECK (stage IN ('BASE_INPUT', 'INTERMEDIARY', 'PRODUCTION_READY', 'FINAL_PRODUCT')),
@@ -9,8 +13,9 @@ CREATE TABLE items (
 );
 
 CREATE TABLE lots (
-  id text PRIMARY KEY,
-  item_id text NOT NULL REFERENCES items (id),
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  code text GENERATED ALWAYS AS ('LT-' || id) STORED UNIQUE,
+  item_id bigint NOT NULL REFERENCES items (id),
   balance numeric NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL,
   expires_at timestamptz NOT NULL,
@@ -20,8 +25,9 @@ CREATE TABLE lots (
 CREATE INDEX lots_item_id_idx ON lots (item_id);
 
 CREATE TABLE transactions (
-  id text PRIMARY KEY,
-  lot_id text NOT NULL REFERENCES lots (id),
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  code text GENERATED ALWAYS AS ('TX-' || id) STORED UNIQUE,
+  lot_id bigint NOT NULL REFERENCES lots (id),
   quantity numeric NOT NULL,
   type text NOT NULL
     CHECK (type IN ('restock', 'batch_made', 'consumed', 'adjustment', 'sale')),

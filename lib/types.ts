@@ -15,7 +15,10 @@ export enum Unit {
 }
 
 export type Item = {
-  id: string
+  /** Assigned by the database. */
+  id: number
+  /** Readable code derived from id by the database, e.g. "IT-1". */
+  code: string
   name: string
   stage: ItemStage
   /** Stock unit. All lots and transactions for this item are counted in this unit. */
@@ -24,8 +27,11 @@ export type Item = {
 }
 
 export type Lot = {
-  id: string
-  itemId: string
+  /** Assigned by the database. */
+  id: number
+  /** Readable code derived from id by the database, e.g. "LT-1". */
+  code: string
+  itemId: number
   /** Quantity the lot started with, in the item's stock unit. Set on creation, never changed. */
   startingQuantity: number
   /** Current quantity in the item's stock unit. Maintained by the ledger trigger. */
@@ -43,8 +49,11 @@ export type Lot = {
 export type TransactionType = 'restock' | 'batch_made' | 'consumed' | 'adjustment' | 'sale'
 
 export type Transaction = {
-  id: string
-  lotId: string
+  /** Assigned by the database. */
+  id: number
+  /** Readable code derived from id by the database, e.g. "TX-1". */
+  code: string
+  lotId: number
   /** Positive adds, negative subtracts. */
   quantity: number
   type: TransactionType
