@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import RestockForm from '@/app/_components/forms/RestockForm'
+import RestockForm from '@/components/forms/RestockForm'
 
 const items = [
   { id: 1, code: 'IT-1', name: 'beef-raw', stage: 'BASE_INPUT', stockUnit: 'KG', shelfLifeDays: 4 },
@@ -53,17 +53,17 @@ test('renders 3 rows, and Add row makes it 4', async () => {
   expect(screen.getByLabelText('Item, row 4')).toBeTruthy()
 })
 
-test('has no typed inputs, and quantity options run 0.5 to 50 in steps of 0.5', async () => {
+test('has no typed inputs, and quantity options run 0.5 to 10 in steps of 0.5', async () => {
   const { container } = render(<RestockForm />)
   await screen.findAllByRole('option', { name: 'beef-raw' })
   expect(container.querySelectorAll('input, textarea')).toHaveLength(0)
 
   const select = screen.getByLabelText('Quantity, row 1') as HTMLSelectElement
   const values = Array.from(select.options, (o) => o.value).filter((v) => v !== '')
-  expect(values).toHaveLength(100)
+  expect(values).toHaveLength(20)
   expect(values[0]).toBe('0.5')
   expect(values[1]).toBe('1')
-  expect(values.at(-1)).toBe('50')
+  expect(values.at(-1)).toBe('10')
 })
 
 test('choosing an item shows its stock unit', async () => {
@@ -113,6 +113,19 @@ test('a row with an item but no quantity blocks the submit', async () => {
 
   const alert = await screen.findByRole('alert')
   expect(alert.textContent).toContain('row 2')
+  expect(postCalls()).toHaveLength(0)
+  expect(alertMock).not.toHaveBeenCalled()
+})
+
+test('a row with a quantity but no item blocks the submit', async () => {
+  await renderLoaded()
+  choose('Item, row 1', 1)
+  choose('Quantity, row 1', 5)
+  choose('Quantity, row 2', 2)
+  submit()
+
+  const alert = await screen.findByRole('alert')
+  expect(alert.textContent).toBe('Choose an item for row 2.')
   expect(postCalls()).toHaveLength(0)
   expect(alertMock).not.toHaveBeenCalled()
 })

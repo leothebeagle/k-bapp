@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import type { StockEntry } from '@/lib/data';
 import type { Item, Lot, Transaction } from '@/lib/types';
-import StockTable from '@/app/_components/tables/StockTable';
-import DataTable from '@/app/_components/tables/DataTable';
-import RestockForm from '@/app/_components/forms/RestockForm';
+import StockTable from '@/components/tables/StockTable';
+import DataTable from '@/components/tables/DataTable';
+import RestockForm from '@/components/forms/RestockForm';
 
 type Data = {
   stock: StockEntry[];

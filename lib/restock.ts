@@ -28,3 +28,8 @@ export function aggregateRestock(rows: RestockRow[]): RestockLine[] {
 export function rowsMissingQuantity(rows: RestockRow[]): number[] {
   return rows.flatMap((row, i) => (row.itemId !== null && row.quantity === null ? [i + 1] : []))
 }
+
+/** 1-based numbers of rows that have a quantity chosen but no item. */
+export function rowsMissingItem(rows: RestockRow[]): number[] {
+  return rows.flatMap((row, i) => (row.itemId === null && row.quantity !== null ? [i + 1] : []))
+}

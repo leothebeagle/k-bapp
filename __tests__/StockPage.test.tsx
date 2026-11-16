@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from 'vitest'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import StockPage from '@/app/stock/StockPage'
 
 afterEach(() => {
@@ -57,13 +57,17 @@ test('shows Loading… then renders the rows returned by each endpoint', async (
   expect(screen.queryByText('Loading…')).toBeNull()
 
   // /api/items twice: once for the Items table, once by RestockForm for its dropdowns.
-  expect(fetchMock.mock.calls.map(([url]) => url).sort()).toEqual([
-    '/api/items',
-    '/api/items',
-    '/api/lots',
-    '/api/stock',
-    '/api/transactions',
-  ])
+  // RestockForm only mounts once the page data has loaded, and it fetches from a passive
+  // effect that React may run after the DOM update findByRole saw, so wait for it.
+  await waitFor(() =>
+    expect(fetchMock.mock.calls.map(([url]) => url).sort()).toEqual([
+      '/api/items',
+      '/api/items',
+      '/api/lots',
+      '/api/stock',
+      '/api/transactions',
+    ]),
+  )
 
   expect(sectionRows('Stock')).toEqual([['▸', 'beef-raw', '9.5 KG']])
   expect(sectionRows('Lots')).toEqual([

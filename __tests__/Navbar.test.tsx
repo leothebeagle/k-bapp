@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
-import Navbar from '@/app/_components/Navbar'
+import Navbar from '@/components/Navbar'
 
 afterEach(cleanup)
 

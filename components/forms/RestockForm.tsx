@@ -4,17 +4,21 @@ import { useEffect, useState } from 'react';
 import type { Item } from '@/lib/types';
 import {
   aggregateRestock,
+  rowsMissingItem,
   rowsMissingQuantity,
   type RestockRow,
 } from '@/lib/restock';
 
 const DEFAULT_ROWS = 3;
 
-/** 0.5, 1, 1.5 … 50. */
-const QUANTITY_OPTIONS = Array.from({ length: 100 }, (_, i) => (i + 1) / 2);
+/** 0.5, 1, 1.5 … 10. */
+const QUANTITY_OPTIONS = Array.from({ length: 20 }, (_, i) => (i + 1) / 2);
 
 const emptyRows = (): RestockRow[] =>
-  Array.from({ length: DEFAULT_ROWS }, () => ({ itemId: null, quantity: null }));
+  Array.from({ length: DEFAULT_ROWS }, () => ({
+    itemId: null,
+    quantity: null,
+  }));
 
 const selectClass = 'rounded border border-zinc-300 bg-white px-2 py-1';
 
@@ -29,7 +33,8 @@ export default function RestockForm() {
     const controller = new AbortController();
     fetch('/api/items', { signal: controller.signal })
       .then((response) => {
-        if (!response.ok) throw new Error(`/api/items responded ${response.status}`);
+        if (!response.ok)
+          throw new Error(`/api/items responded ${response.status}`);
         return response.json() as Promise<Item[]>;
       })
       .then(setItems)
@@ -49,13 +54,21 @@ export default function RestockForm() {
     setError(null);
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const missing = rowsMissingQuantity(rows);
     if (missing.length > 0) {
       setError(
         `Choose a quantity for row${missing.length > 1 ? 's' : ''} ${missing.join(', ')}.`,
+      );
+      return;
+    }
+
+    const missingItem = rowsMissingItem(rows);
+    if (missingItem.length > 0) {
+      setError(
+        `Choose an item for row${missingItem.length > 1 ? 's' : ''} ${missingItem.join(', ')}.`,
       );
       return;
     }
@@ -79,7 +92,9 @@ export default function RestockForm() {
         error?: string;
       };
       if (!response.ok) {
-        throw new Error(result.error ?? `/api/supply-restock responded ${response.status}`);
+        throw new Error(
+          result.error ?? `/api/supply-restock responded ${response.status}`,
+        );
       }
       alert(result.message);
       setRows(emptyRows());
@@ -92,20 +107,33 @@ export default function RestockForm() {
 
   return (
     <section className='flex w-fit flex-col rounded border border-zinc-200 bg-white'>
-      <h2 className='border-b border-zinc-200 px-3 py-2 font-semibold'>Restock</h2>
+      <h2 className='border-b border-zinc-200 px-3 py-2 font-semibold'>
+        Restock
+      </h2>
       <form onSubmit={handleSubmit} className='flex flex-col gap-2 p-3 text-sm'>
         {rows.map((row, i) => {
           const n = i + 1;
-          const unit = row.itemId === null ? '' : itemsById.get(row.itemId)?.stockUnit ?? '';
+          const unit =
+            row.itemId === null
+              ? ''
+              : (itemsById.get(row.itemId)?.stockUnit ?? '');
           return (
-            <div key={i} role='group' aria-label={`Row ${n}`} className='flex items-center gap-2'>
+            <div
+              key={i}
+              role='group'
+              aria-label={`Row ${n}`}
+              className='flex items-center gap-2'
+            >
               <span className='w-5 text-zinc-500'>{n}</span>
               <select
                 aria-label={`Item, row ${n}`}
                 className={`${selectClass} w-44`}
                 value={row.itemId ?? ''}
                 onChange={(e) =>
-                  updateRow(i, { itemId: e.target.value === '' ? null : Number(e.target.value) })
+                  updateRow(i, {
+                    itemId:
+                      e.target.value === '' ? null : Number(e.target.value),
+                  })
                 }
               >
                 <option value=''>Choose item…</option>
@@ -120,7 +148,10 @@ export default function RestockForm() {
                 className={`${selectClass} w-24`}
                 value={row.quantity ?? ''}
                 onChange={(e) =>
-                  updateRow(i, { quantity: e.target.value === '' ? null : Number(e.target.value) })
+                  updateRow(i, {
+                    quantity:
+                      e.target.value === '' ? null : Number(e.target.value),
+                  })
                 }
               >
                 <option value=''>Qty…</option>
@@ -130,7 +161,10 @@ export default function RestockForm() {
                   </option>
                 ))}
               </select>
-              <output aria-label={`Unit, row ${n}`} className='w-16 text-zinc-600'>
+              <output
+                aria-label={`Unit, row ${n}`}
+                className='w-16 text-zinc-600'
+              >
                 {unit}
               </output>
             </div>
@@ -138,7 +172,10 @@ export default function RestockForm() {
         })}
 
         {error && (
-          <p role='alert' className='rounded border border-red-200 bg-red-50 px-3 py-2 text-red-700'>
+          <p
+            role='alert'
+            className='rounded border border-red-200 bg-red-50 px-3 py-2 text-red-700'
+          >
             {error}
           </p>
         )}
@@ -146,7 +183,12 @@ export default function RestockForm() {
         <div className='flex gap-2 pt-1'>
           <button
             type='button'
-            onClick={() => setRows((current) => [...current, { itemId: null, quantity: null }])}
+            onClick={() =>
+              setRows((current) => [
+                ...current,
+                { itemId: null, quantity: null },
+              ])
+            }
             className='rounded border border-zinc-300 px-3 py-1 hover:bg-zinc-100'
           >
             Add row

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aggregateRestock, rowsMissingQuantity } from '@/lib/restock'
+import { aggregateRestock, rowsMissingItem, rowsMissingQuantity } from '@/lib/restock'
 
 const BEEF = 1
 const SOY = 2
@@ -49,5 +49,28 @@ describe('rowsMissingQuantity', () => {
         { itemId: BEEF, quantity: null },
       ]),
     ).toEqual([2, 4])
+  })
+})
+
+describe('rowsMissingItem', () => {
+  it('returns 1-based numbers of rows with a quantity but no item', () => {
+    expect(
+      rowsMissingItem([
+        { itemId: BEEF, quantity: 5 },
+        { itemId: null, quantity: 2 },
+        { itemId: null, quantity: null },
+        { itemId: SOY, quantity: null },
+        { itemId: null, quantity: 0.5 },
+      ]),
+    ).toEqual([2, 5])
+  })
+
+  it('returns nothing when every row is empty or complete', () => {
+    expect(
+      rowsMissingItem([
+        { itemId: null, quantity: null },
+        { itemId: BEEF, quantity: 5 },
+      ]),
+    ).toEqual([])
   })
 })
