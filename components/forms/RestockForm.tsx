@@ -171,6 +171,17 @@ export default function RestockForm() {
           );
         })}
 
+        <button
+          type='button'
+          onClick={() =>
+            setRows((current) => [...current, { itemId: null, quantity: null }])
+          }
+          // ml-7 = number column (w-5) + gap-2; w-70 = item (w-44) + gap-2 + quantity (w-24).
+          className='ml-7 w-70 self-start rounded border border-zinc-300 px-3 py-1 hover:bg-zinc-100'
+        >
+          + Row
+        </button>
+
         {error && (
           <p
             role='alert'
@@ -180,18 +191,16 @@ export default function RestockForm() {
           </p>
         )}
 
-        <div className='flex gap-2 pt-1'>
+        <div className='flex justify-end gap-2 pt-1'>
           <button
             type='button'
-            onClick={() =>
-              setRows((current) => [
-                ...current,
-                { itemId: null, quantity: null },
-              ])
-            }
-            className='rounded border border-zinc-300 px-3 py-1 hover:bg-zinc-100'
+            onClick={() => {
+              setRows(emptyRows());
+              setError(null);
+            }}
+            className='rounded border border-zinc-300 bg-red-100 px-3 py-1 hover:bg-red-200'
           >
-            Add row
+            Clear
           </button>
           <button
             type='submit'

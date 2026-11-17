@@ -44,11 +44,11 @@ test('fetches items on load', async () => {
   expect(fetchMock).toHaveBeenCalledWith('/api/items', expect.anything())
 })
 
-test('renders 3 rows, and Add row makes it 4', async () => {
+test('renders 3 rows, and + Row makes it 4', async () => {
   await renderLoaded()
   expect(screen.getAllByRole('group')).toHaveLength(3)
 
-  fireEvent.click(screen.getByRole('button', { name: 'Add row' }))
+  fireEvent.click(screen.getByRole('button', { name: '+ Row' }))
   expect(screen.getAllByRole('group')).toHaveLength(4)
   expect(screen.getByLabelText('Item, row 4')).toBeTruthy()
 })
@@ -80,7 +80,7 @@ test('choosing an item shows its stock unit', async () => {
 
 test('submits the combined lines and alerts the returned message', async () => {
   await renderLoaded()
-  fireEvent.click(screen.getByRole('button', { name: 'Add row' }))
+  fireEvent.click(screen.getByRole('button', { name: '+ Row' }))
 
   choose('Item, row 1', 1)
   choose('Quantity, row 1', 5)
@@ -128,4 +128,39 @@ test('a row with a quantity but no item blocks the submit', async () => {
   expect(alert.textContent).toBe('Choose an item for row 2.')
   expect(postCalls()).toHaveLength(0)
   expect(alertMock).not.toHaveBeenCalled()
+})
+
+const clear = () => fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
+
+const value = (label: string) => (screen.getByLabelText(label) as HTMLSelectElement).value
+
+test('Clear brings back 3 empty rows', async () => {
+  await renderLoaded()
+  fireEvent.click(screen.getByRole('button', { name: '+ Row' }))
+  choose('Item, row 1', 1)
+  choose('Quantity, row 1', 5)
+  choose('Item, row 2', 2)
+  choose('Quantity, row 2', 2)
+
+  clear()
+
+  expect(screen.getAllByRole('group')).toHaveLength(3)
+  for (const n of [1, 2, 3]) {
+    expect(value(`Item, row ${n}`)).toBe('')
+    expect(value(`Quantity, row ${n}`)).toBe('')
+    expect(screen.getByLabelText(`Unit, row ${n}`).textContent).toBe('')
+  }
+  expect(postCalls()).toHaveLength(0)
+})
+
+test('Clear removes the error message', async () => {
+  await renderLoaded()
+  choose('Item, row 1', 1)
+  submit()
+  await screen.findByRole('alert')
+
+  clear()
+
+  expect(screen.queryByRole('alert')).toBeNull()
+  expect(postCalls()).toHaveLength(0)
 })
