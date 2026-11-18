@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { aggregateRestock, rowsMissingItem, rowsMissingQuantity } from '@/lib/restock'
+import { aggregateFormItems, rowsMissingItem, rowsMissingQuantity } from '@/lib/restock'
 
 const BEEF = 1
 const SOY = 2
 
-describe('aggregateRestock', () => {
+describe('aggregateFormItems', () => {
   it('combines rows with the same item, adding quantities', () => {
     expect(
-      aggregateRestock([
+      aggregateFormItems([
         { itemId: BEEF, quantity: 5 },
         { itemId: BEEF, quantity: 10 },
       ]),
@@ -16,7 +16,7 @@ describe('aggregateRestock', () => {
 
   it('keeps different items separate, in first-appearance order', () => {
     expect(
-      aggregateRestock([
+      aggregateFormItems([
         { itemId: SOY, quantity: 2 },
         { itemId: BEEF, quantity: 5 },
         { itemId: SOY, quantity: 0.5 },
@@ -29,13 +29,13 @@ describe('aggregateRestock', () => {
 
   it('drops empty rows', () => {
     expect(
-      aggregateRestock([
+      aggregateFormItems([
         { itemId: null, quantity: null },
         { itemId: BEEF, quantity: 5 },
         { itemId: null, quantity: 3 },
       ]),
     ).toEqual([{ itemId: BEEF, quantity: 5 }])
-    expect(aggregateRestock([{ itemId: null, quantity: null }])).toEqual([])
+    expect(aggregateFormItems([{ itemId: null, quantity: null }])).toEqual([])
   })
 })
 

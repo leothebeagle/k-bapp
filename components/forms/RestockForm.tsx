@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { Item } from '@/lib/types';
 import {
-  aggregateRestock,
+  aggregateFormItems,
   rowsMissingItem,
   rowsMissingQuantity,
   type RestockRow,
@@ -73,7 +73,7 @@ export default function RestockForm() {
       return;
     }
 
-    const lines = aggregateRestock(rows);
+    const lines = aggregateFormItems(rows);
     if (lines.length === 0) {
       setError('Choose at least one item.');
       return;

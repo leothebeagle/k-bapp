@@ -15,7 +15,7 @@ export type RestockLine = {
  * Rows missing an item or a quantity are dropped. Lines keep the order in
  * which each item first appears.
  */
-export function aggregateRestock(rows: RestockRow[]): RestockLine[] {
+export function aggregateFormItems(rows: RestockRow[]): RestockLine[] {
   const totals = new Map<number, number>()
   for (const { itemId, quantity } of rows) {
     if (itemId === null || quantity === null) continue

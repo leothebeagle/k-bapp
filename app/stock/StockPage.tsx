@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { StockEntry } from '@/lib/data';
 import type { Item, Lot, Transaction } from '@/lib/types';
+
 import StockTable from '@/components/tables/StockTable';
 import DataTable from '@/components/tables/DataTable';
 import RestockForm from '@/components/forms/RestockForm';
