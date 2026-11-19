@@ -1,8 +1,8 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createTestDb, type Db } from '@/lib/db'
-import { migrate } from '@/lib/migrate'
-import { reset, seed } from '@/lib/seed'
+import { createTestDb, type Db } from '@/lib/server/db/db'
+import { migrate } from '@/lib/server/db/migrate'
+import { reset, seed } from '@/lib/server/db/seed'
 
 describe('seed', () => {
   let db: Db

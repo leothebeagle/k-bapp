@@ -1,10 +1,13 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createTestDb, type Db } from '@/lib/db'
-import { migrate } from '@/lib/migrate'
-import { getStock, listItems, listLots, listTransactions } from '@/lib/data'
+import { createTestDb, type Db } from '@/lib/server/db/db'
+import { migrate } from '@/lib/server/db/migrate'
+import { listItems } from '@/lib/server/data/items'
+import { listLots } from '@/lib/server/data/lots'
+import { getStock } from '@/lib/server/data/stock'
+import { listTransactions } from '@/lib/server/data/transactions'
 
-// lib/data.ts goes through query(), which uses the shared default db cached on
+// lib/server/data/ goes through query(), which uses the shared default db cached on
 // globalThis by getDb(). Point that slot at a fresh in-memory database.
 const globalForDb = globalThis as typeof globalThis & { __kbappDb?: Db }
 
@@ -17,7 +20,9 @@ const T3_TIME = '2026-03-02T12:00:00.000Z'
 
 /**
  * One item; lot 1 starts at 5 (+5 restock, -2 consumed), lot 2 starts at 10
- * (+10 restock). The database is fresh, so the identity columns assign IDs
+ * (+10 restock). Nothing in the database calculates balances, so each lot's
+ * balance is inserted to match its transactions (lot 1: 3, lot 2: 10). The
+ * database is fresh, so the identity columns assign IDs
  * 1, 2, 3… in insert order: item 1 (IT-1), lots 1–2 (LT-1, LT-2), transactions
  * 1–3 (TX-1…TX-3).
  */
@@ -27,9 +32,9 @@ async function insertFixtures(db: Db): Promise<void> {
      VALUES ('beef-raw', 'BASE_INPUT', 'KG', 4)`,
   )
   await db.query(
-    `INSERT INTO lots (item_id, starting_quantity, created_at, expires_at)
-     VALUES ((SELECT id FROM items WHERE name = 'beef-raw'), 5, $1, $2),
-            ((SELECT id FROM items WHERE name = 'beef-raw'), 10, $3, $4)`,
+    `INSERT INTO lots (item_id, starting_quantity, balance, created_at, expires_at)
+     VALUES ((SELECT id FROM items WHERE name = 'beef-raw'), 5, 3, $1, $2),
+            ((SELECT id FROM items WHERE name = 'beef-raw'), 10, 10, $3, $4)`,
     [L1_CREATED, L1_EXPIRES, L2_CREATED, L2_EXPIRES],
   )
   await db.query(
@@ -89,38 +94,18 @@ describe('data', () => {
     ])
   })
 
-  it('rejects changing starting_quantity after the lot is created', async () => {
-    await expect(
-      db.query(`UPDATE lots SET starting_quantity = 6 WHERE id = 1`),
-    ).rejects.toThrow(/starting_quantity cannot change/)
-    expect((await listLots()).map((l) => l.startingQuantity)).toEqual([5, 10])
-  })
-
-  it('a lot with no finished_at is active', async () => {
+  it('a new lot is active by default, with no finished_at', async () => {
     const lot = (await listLots()).find((l) => l.code === 'LT-1')
     expect(lot).toMatchObject({ finishedAt: null, active: true })
   })
 
-  it('setting finished_at makes the lot inactive and drops it from getStock', async () => {
+  it('a finished, inactive lot is dropped from getStock', async () => {
     const finished = '2026-03-03T08:00:00.000Z'
-    await db.query(`UPDATE lots SET finished_at = $1 WHERE id = 1`, [finished])
+    await db.query(`UPDATE lots SET finished_at = $1, active = false WHERE id = 1`, [finished])
 
     const lot = (await listLots()).find((l) => l.code === 'LT-1')
     expect(lot).toMatchObject({ finishedAt: finished, active: false })
     expect((await getStock())[0].details.map((d) => d.lot)).toEqual(['LT-2'])
-  })
-
-  it('rejects setting active directly', async () => {
-    await expect(
-      db.query(`UPDATE lots SET active = false WHERE id = 1`),
-    ).rejects.toThrow(/column "active"/)
-    await expect(
-      db.query(
-        `INSERT INTO lots (item_id, starting_quantity, created_at, expires_at, active)
-         VALUES (1, 1, now(), now() + interval '1 day', false)`,
-      ),
-    ).rejects.toThrow(/column "active"/)
-    expect((await listLots()).map((l) => l.active)).toEqual([true, true])
   })
 
   it('listTransactions returns transactions with a numeric quantity', async () => {

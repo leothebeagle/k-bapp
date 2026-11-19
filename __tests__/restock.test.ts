@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aggregateFormItems, rowsMissingItem, rowsMissingQuantity } from '@/lib/restock'
+import { aggregateFormItems, rowsMissingItem, rowsMissingQuantity } from '@/lib/shared/restockForm'
 
 const BEEF = 1
 const SOY = 2

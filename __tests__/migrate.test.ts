@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createTestDb, type Db } from '@/lib/db'
-import { migrate } from '@/lib/migrate'
+import { createTestDb, type Db } from '@/lib/server/db/db'
+import { migrate } from '@/lib/server/db/migrate'
 
 describe('migrate', () => {
   let db: Db
@@ -37,15 +37,5 @@ describe('migrate', () => {
       'SELECT name FROM schema_migrations ORDER BY name',
     )
     expect(recorded.map((r) => r.name)).toEqual(first)
-  })
-
-  it('rejects a lot whose item_id does not exist', async () => {
-    await migrate(db)
-    await expect(
-      db.query(
-        `INSERT INTO lots (item_id, starting_quantity, created_at, expires_at)
-         VALUES (999, 0, now(), now() + interval '1 day')`,
-      ),
-    ).rejects.toThrow(/foreign key/)
   })
 })

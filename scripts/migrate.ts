@@ -1,5 +1,5 @@
-import { getDb } from '../lib/db'
-import { migrate } from '../lib/migrate'
+import { getDb } from '../lib/server/db/db'
+import { migrate } from '../lib/server/db/migrate'
 
 async function main() {
   const db = getDb()

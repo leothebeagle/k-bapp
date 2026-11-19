@@ -1,21 +1,22 @@
 -- IDs are assigned by the database and cannot be supplied on insert. Each
 -- table also has a readable code derived from its ID (IT-1, LT-1, TX-1).
+--
+-- No constraints beyond primary keys and NOT NULL: allowed values, references
+-- between tables and uniqueness are not enforced by the database.
 
 CREATE TABLE items (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  code text GENERATED ALWAYS AS ('IT-' || id) STORED UNIQUE,
-  name text NOT NULL UNIQUE,
-  stage text NOT NULL
-    CHECK (stage IN ('BASE_INPUT', 'INTERMEDIARY', 'PRODUCTION_READY', 'FINAL_PRODUCT')),
-  stock_unit text NOT NULL
-    CHECK (stock_unit IN ('KG', 'LITER', 'UNIT', 'PORTION', 'ROLL', 'BATCH')),
+  code text GENERATED ALWAYS AS ('IT-' || id) STORED,
+  name text NOT NULL,
+  stage text NOT NULL,
+  stock_unit text NOT NULL,
   shelf_life_days integer NOT NULL
 );
 
 CREATE TABLE lots (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  code text GENERATED ALWAYS AS ('LT-' || id) STORED UNIQUE,
-  item_id bigint NOT NULL REFERENCES items (id),
+  code text GENERATED ALWAYS AS ('LT-' || id) STORED,
+  item_id bigint NOT NULL,
   balance numeric NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL,
   expires_at timestamptz NOT NULL,
@@ -26,11 +27,10 @@ CREATE INDEX lots_item_id_idx ON lots (item_id);
 
 CREATE TABLE transactions (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  code text GENERATED ALWAYS AS ('TX-' || id) STORED UNIQUE,
-  lot_id bigint NOT NULL REFERENCES lots (id),
+  code text GENERATED ALWAYS AS ('TX-' || id) STORED,
+  lot_id bigint NOT NULL,
   quantity numeric NOT NULL,
-  type text NOT NULL
-    CHECK (type IN ('restock', 'batch_made', 'consumed', 'adjustment', 'sale')),
+  type text NOT NULL,
   timestamp timestamptz NOT NULL,
   performed_by text NULL,
   notes text NULL

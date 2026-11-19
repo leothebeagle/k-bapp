@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createTestDb, type Db } from '@/lib/db'
-import { migrate } from '@/lib/migrate'
+import { createTestDb, type Db } from '@/lib/server/db/db'
+import { migrate } from '@/lib/server/db/migrate'
 
 const SUPPLIED_ID = /cannot insert a non-DEFAULT value into column "id"/
 const SUPPLIED_CODE = /cannot insert a non-DEFAULT value into column "code"/

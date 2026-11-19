@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it } from 'vitest'
-import { createTestDb, type Db } from '@/lib/db'
+import { createTestDb, type Db } from '@/lib/server/db/db'
 
 describe('createTestDb', () => {
   let db: Db | undefined

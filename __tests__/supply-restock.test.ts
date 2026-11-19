@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createTestDb, type Db } from '@/lib/db'
-import { migrate } from '@/lib/migrate'
+import { createTestDb, type Db } from '@/lib/server/db/db'
+import { migrate } from '@/lib/server/db/migrate'
 import { POST } from '@/app/api/supply-restock/route'
 
 // The route reads items through query(), which uses the shared default db
@@ -41,7 +41,7 @@ describe('POST /api/supply-restock', () => {
   it('returns a message listing each item with its quantity and unit', async () => {
     const response = await post(
       JSON.stringify({
-        lines: [
+        restockFormItems: [
           { itemId: 1, quantity: 15 },
           { itemId: 2, quantity: 2 },
         ],
@@ -55,17 +55,17 @@ describe('POST /api/supply-restock', () => {
 
   it.each([
     ['no body', undefined],
-    ['invalid JSON', '{lines:'],
+    ['invalid JSON', '{restockFormItems:'],
     ['null', 'null'],
-    ['no lines', '{}'],
-    ['empty lines', '{"lines":[]}'],
-    ['lines not an array', '{"lines":{"itemId":1,"quantity":5}}'],
-    ['missing quantity', '{"lines":[{"itemId":1}]}'],
-    ['string quantity', '{"lines":[{"itemId":1,"quantity":"5"}]}'],
-    ['zero quantity', '{"lines":[{"itemId":1,"quantity":0}]}'],
-    ['negative quantity', '{"lines":[{"itemId":1,"quantity":-1}]}'],
-    ['non-integer itemId', '{"lines":[{"itemId":1.5,"quantity":5}]}'],
-    ['unknown itemId', '{"lines":[{"itemId":99,"quantity":5}]}'],
+    ['no restockFormItems', '{}'],
+    ['empty restockFormItems', '{"restockFormItems":[]}'],
+    ['restockFormItems not an array', '{"restockFormItems":{"itemId":1,"quantity":5}}'],
+    ['missing quantity', '{"restockFormItems":[{"itemId":1}]}'],
+    ['string quantity', '{"restockFormItems":[{"itemId":1,"quantity":"5"}]}'],
+    ['zero quantity', '{"restockFormItems":[{"itemId":1,"quantity":0}]}'],
+    ['negative quantity', '{"restockFormItems":[{"itemId":1,"quantity":-1}]}'],
+    ['non-integer itemId', '{"restockFormItems":[{"itemId":1.5,"quantity":5}]}'],
+    ['unknown itemId', '{"restockFormItems":[{"itemId":99,"quantity":5}]}'],
   ])('returns 400 for %s', async (_, body) => {
     const response = await post(body)
     expect(response.status).toBe(400)

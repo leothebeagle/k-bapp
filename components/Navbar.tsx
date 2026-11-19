@@ -6,8 +6,8 @@ export default function Navbar() {
       <Link href="/" className="font-semibold text-zinc-900">
         k-bapp
       </Link>
-      <Link href="/stock" className="text-zinc-600 hover:text-zinc-900">
-        Stock
+      <Link href="/restock" className="text-zinc-600 hover:text-zinc-900">
+        Restock
       </Link>
     </nav>
   )

@@ -32,9 +32,9 @@ export type Lot = {
   /** Readable code derived from id by the database, e.g. "LT-1". */
   code: string
   itemId: number
-  /** Quantity the lot started with, in the item's stock unit. Set on creation, never changed. */
+  /** Quantity the lot started with, in the item's stock unit. Set on creation. */
   startingQuantity: number
-  /** Current quantity in the item's stock unit. Maintained by the ledger trigger. */
+  /** Current quantity in the item's stock unit. Not calculated by the database. */
   balance: number
   /** ISO 8601 timestamp. */
   createdAt: string
@@ -42,7 +42,7 @@ export type Lot = {
   expiresAt: string
   /** ISO 8601 timestamp, or null while the lot is active. */
   finishedAt: string | null
-  /** True while finishedAt is null. Derived by the database, never written directly. */
+  /** Whether the lot is still in use. A plain column, not derived from finishedAt. */
   active: boolean
 }
 
@@ -61,4 +61,10 @@ export type Transaction = {
   timestamp: string
   performedBy?: string
   notes?: string
+}
+
+export type StockEntry = {
+  summary: { item: string; total: string }
+  /** lot is the lot's readable code, e.g. "LT-1". */
+  details: { lot: string; starting: number; balance: number; created: string; expires: string }[]
 }

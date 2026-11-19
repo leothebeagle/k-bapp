@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import type { Item } from '@/lib/types';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import type { Item } from '@/lib/shared/types';
 import {
   aggregateFormItems,
   rowsMissingItem,
   rowsMissingQuantity,
   type RestockRow,
-} from '@/lib/restock';
+} from '@/lib/shared/restockForm';
 
 const DEFAULT_ROWS = 3;
 
@@ -22,28 +23,11 @@ const emptyRows = (): RestockRow[] =>
 
 const selectClass = 'rounded border border-zinc-300 bg-white px-2 py-1';
 
-export default function RestockForm() {
-  const [items, setItems] = useState<Item[]>([]);
+export default function RestockForm({ items }: { items: Item[] }) {
+  const router = useRouter();
   const [rows, setRows] = useState<RestockRow[]>(emptyRows);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    // Abort on unmount so a late response can't set state.
-    const controller = new AbortController();
-    fetch('/api/items', { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(`/api/items responded ${response.status}`);
-        return response.json() as Promise<Item[]>;
-      })
-      .then(setItems)
-      .catch((err: unknown) => {
-        if (controller.signal.aborted) return;
-        setError(err instanceof Error ? err.message : String(err));
-      });
-    return () => controller.abort();
-  }, []);
 
   const itemsById = new Map(items.map((item) => [item.id, item]));
 
@@ -73,8 +57,8 @@ export default function RestockForm() {
       return;
     }
 
-    const lines = aggregateFormItems(rows);
-    if (lines.length === 0) {
+    const restockFormItems = aggregateFormItems(rows);
+    if (restockFormItems.length === 0) {
       setError('Choose at least one item.');
       return;
     }
@@ -85,7 +69,7 @@ export default function RestockForm() {
       const response = await fetch('/api/supply-restock', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lines }),
+        body: JSON.stringify({ restockFormItems }),
       });
       const result = (await response.json().catch(() => ({}))) as {
         message?: string;
@@ -98,6 +82,8 @@ export default function RestockForm() {
       }
       alert(result.message);
       setRows(emptyRows());
+      // Re-render the Server Components so the tables show the new stock.
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

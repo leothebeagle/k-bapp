@@ -1,6 +1,6 @@
-import { getDb } from '../lib/db'
-import { migrate } from '../lib/migrate'
-import { reset, seed } from '../lib/seed'
+import { getDb } from '../lib/server/db/db'
+import { migrate } from '../lib/server/db/migrate'
+import { reset, seed } from '../lib/server/db/seed'
 
 async function main() {
   const doReset = process.argv.includes('--reset')

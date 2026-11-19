@@ -12,8 +12,7 @@ export async function seed(db: Db): Promise<void> {
 /**
  * Removes all rows from items, lots and transactions, then seeds.
  *
- * Uses TRUNCATE rather than DELETE: transactions are append-only and its
- * row-level DELETE trigger rejects deletes, but TRUNCATE doesn't fire it.
+ * Uses TRUNCATE, which empties all three tables in one statement.
  * Clearing and seeding run in one transaction, so a failed seed leaves the
  * old rows in place.
  */

@@ -1,21 +1,24 @@
-/** One form row. null means nothing has been chosen yet. */
+/** One raw form row, possibly empty. null means nothing has been chosen yet. */
 export type RestockRow = {
   itemId: number | null
   quantity: number | null
 }
 
-/** One line of a restock request, in the item's stock unit. */
-export type RestockLine = {
+/**
+ * One item of a restock request with its total quantity, in the item's stock
+ * unit, after form rows with the same item are combined.
+ */
+export type RestockFormItem = {
   itemId: number
   quantity: number
 }
 
 /**
- * Combines rows with the same item into one line, adding their quantities.
- * Rows missing an item or a quantity are dropped. Lines keep the order in
- * which each item first appears.
+ * Combines rows with the same item into one restock form item, adding their
+ * quantities. Rows missing an item or a quantity are dropped. Restock form
+ * items keep the order in which each item first appears.
  */
-export function aggregateFormItems(rows: RestockRow[]): RestockLine[] {
+export function aggregateFormItems(rows: RestockRow[]): RestockFormItem[] {
   const totals = new Map<number, number>()
   for (const { itemId, quantity } of rows) {
     if (itemId === null || quantity === null) continue

@@ -1,4 +1,4 @@
-import { getDb } from '../lib/db'
+import { getDb } from '../lib/server/db/db'
 
 async function main() {
   const sql = process.argv.slice(2).join(' ').trim()

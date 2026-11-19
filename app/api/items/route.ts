@@ -1,5 +1,5 @@
 import { connection } from 'next/server'
-import { listItems } from '@/lib/data'
+import { listItems } from '@/lib/server/data/items'
 
 export async function GET() {
   // Always read the database at request time, never prerender at build.

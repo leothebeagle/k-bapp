@@ -1,4 +1,4 @@
--- A lot is active until it is finished. active is derived from finished_at by
--- Postgres and cannot be written directly; set finished_at to finish a lot.
+-- Whether the lot is still in use. A plain column: it is not derived from
+-- finished_at, so whatever finishes a lot must set both.
 ALTER TABLE lots
-  ADD COLUMN active boolean GENERATED ALWAYS AS (finished_at IS NULL) STORED;
+  ADD COLUMN active boolean NOT NULL DEFAULT true;
