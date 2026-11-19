@@ -57,9 +57,9 @@ A Map object / lookup table is faster than iterating over an array. which we cou
 
 now assuming all our checks are passing, we now want to persist the items as new lots. i.e create a new entry, so we will take the bits that we fill in ourselves (like the name and quantity and unit) and leave out the bits that the DB fills in, ex: created_at or id etc.
 
-- need a function that will accept arguments for each item of the supply restock form and insert an entry into the Lots table.
+[] need a function that will accept arguments for each item of the supply restock form and insert an entry into the Lots table.
 
-- should split db interactions into their logical groupings. ex lib/data/transactions
+[x] should split db interactions into their logical groupings. ex lib/data/transactions
 
 ---
 
